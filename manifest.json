@@ -1,0 +1,22 @@
+{
+    "name": "Calculadora Profesional de AC",
+    "short_name": "Calculadora AC",
+    "description": "Una herramienta completa para el cálculo de carga térmica para sistemas de aire acondicionado.",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1f2937",
+    "icons": [
+        {
+            "src": "icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
+
