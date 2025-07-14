@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-title" content="Calculadora AC Pro">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     
-    <!-- NOTA DE COMPATIBILIDAD: La etiqueta 'theme-color' es para mejorar la apariencia en navegadores móviles (Chrome, Safari, Edge). Firefox y Opera no la soportan, pero no causa ningún error, simplemente no se aplica el color en esos navegadores. -->
+    <!-- Colores del tema basados en el logo -->
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1f2937" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#1A5F7A" media="(prefers-color-scheme: dark)">
 
     <!-- Librerías Externas -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,12 +23,20 @@
 
     <style>
         :root {
-            --bg-color: #f9fafb; --card-bg-color: #ffffff; --text-color: #1f2937;
-            --text-muted-color: #6b7280; --border-color: #e5e7eb; --primary-color: #3b82f6;
+            --bg-color: #f0f4f8; /* Gris azulado muy claro */
+            --card-bg-color: #ffffff;
+            --text-color: #1A5F7A; /* Azul oscuro del logo */
+            --text-muted-color: #6b7280;
+            --border-color: #e5e7eb;
+            --primary-color: #57B869; /* Verde del logo */
+            --accent-color: #15A2D1; /* Azul claro del copo de nieve */
         }
         html.dark {
-            --bg-color: #111827; --card-bg-color: #1f2937; --text-color: #f9fafb;
-            --text-muted-color: #9ca3af; --border-color: #374151;
+            --bg-color: #1A5F7A; /* Azul oscuro del logo */
+            --card-bg-color: #247494; /* Azul oscuro más claro */
+            --text-color: #ffffff;
+            --text-muted-color: #a0d3e8; /* Azul claro para texto secundario */
+            --border-color: #247494;
         }
         body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
         .card { background-color: var(--card-bg-color); border: 1px solid var(--border-color); }
@@ -42,6 +50,9 @@
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(26px); }
         .slider.round { border-radius: 34px; } .slider.round:before { border-radius: 50%; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: var(--text-muted-color); color: white; }
+        .btn-accent { background-color: var(--accent-color); color: white; }
 
         .chart-container {
             position: relative;
@@ -78,7 +89,6 @@
                 </select>
             </div>
             <div class="theme-switch-wrapper">
-                <!-- CORRECCIÓN DE ACCESIBILIDAD: Añadido aria-label y title para describir la función del control. -->
                 <label class="theme-switch" for="theme-toggle">
                     <input type="checkbox" id="theme-toggle" aria-label="Activar modo oscuro" title="Activar modo oscuro"/>
                     <div class="slider round"></div>
@@ -92,8 +102,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <span class="font-medium" data-lang="stepProgress">Paso 1 de 4</span>
                     <div class="w-full mx-4 bg-gray-200 rounded-full h-2">
-                        <!-- NOTA DE ESTILO EN LÍNEA: El estilo 'width' se modifica dinámicamente con JavaScript para mostrar el progreso. Es una excepción aceptable a la regla de no usar estilos en línea. -->
-                        <div id="progress-bar" class="bg-blue-500 h-2 rounded-full" style="width: 25%"></div>
+                        <div id="progress-bar" class="h-2 rounded-full" style="width: 25%; background-color: var(--primary-color);"></div>
                     </div>
                 </div>
             </div>
@@ -183,6 +192,7 @@
                         <div><label for="computers" class="icon-label"><i class="ph-bold ph-desktop"></i><span data-lang="computers"># Computadoras / Laptops</span></label><input type="number" id="computers" value="1" class="w-full p-2 input-field rounded-md"></div>
                         <div><label for="lights" class="icon-label"><i class="ph-bold ph-lightbulb"></i><span data-lang="lights">Luces (Watts totales)</span></label><input type="number" id="lights" value="100" class="w-full p-2 input-field rounded-md"></div>
                         <div><label for="other-heat" class="icon-label"><i class="ph-bold ph-device-tablet"></i><span data-lang="equipment">Otros equipos (TV, etc.)</span></label><input type="number" id="other-heat" value="1" class="w-full p-2 input-field rounded-md"></div>
+                        <div><label for="usage-hours" class="icon-label"><i class="ph-bold ph-timer"></i><span data-lang="usageHours">Horas de Uso Diario</span></label><input type="number" id="usage-hours" value="8" class="w-full p-2 input-field rounded-md"></div>
                     </div>
                 </div>
                 <!-- Paso 4: Opciones Avanzadas -->
@@ -216,9 +226,9 @@
                 </div>
                 <!-- Botones de navegación -->
                 <div class="mt-8 flex justify-between">
-                    <button type="button" id="prev-btn" class="py-2 px-4 rounded-md hidden" data-lang="prev">Anterior</button>
-                    <button type="button" id="next-btn" class="bg-blue-500 text-white py-2 px-4 rounded-md" data-lang="next">Siguiente</button>
-                    <button type="submit" id="calc-btn" class="bg-green-500 text-white py-2 px-4 rounded-md hidden" data-lang="calculate">Calcular</button>
+                    <button type="button" id="prev-btn" class="py-2 px-4 rounded-md hidden btn-secondary" data-lang="prev">Anterior</button>
+                    <button type="button" id="next-btn" class="py-2 px-4 rounded-md btn-primary" data-lang="next">Siguiente</button>
+                    <button type="submit" id="calc-btn" class="py-2 px-4 rounded-md hidden btn-primary" data-lang="calculate">Calcular</button>
                 </div>
                 <p class="text-xs text-muted-color mt-4" data-lang="disclaimer">🔒 Todos los cálculos se realizan en tu dispositivo. Ningún dato es enviado a nuestros servidores.</p>
             </form>
@@ -229,7 +239,7 @@
                 <h2 class="font-bold text-2xl mb-4" data-lang="resultsTitle">Resultados del Cálculo</h2>
                 <div class="text-center mb-6">
                     <p class="text-lg text-muted-color" data-lang="requiredCapacity">Capacidad Requerida</p>
-                    <p class="text-5xl font-bold text-blue-500" id="btu-result">12,000 BTU/h</p>
+                    <p class="text-5xl font-bold" id="btu-result" style="color: var(--primary-color);">12,000 BTU/h</p>
                     <p class="text-muted-color" id="kw-result">(3.5 kW)</p>
                 </div>
                 <div class="mb-6 chart-container">
@@ -257,18 +267,22 @@
                                 </thead>
                                 <tbody id="consumption-table"></tbody>
                             </table>
+                            <div class="flex items-center space-x-2 text-sm mt-4">
+                                <label for="custom-seer" data-lang="customSeer">SEER Personalizado:</label>
+                                <input type="number" id="custom-seer" value="16" step="1" class="w-20 p-1 input-field rounded-md">
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="mt-6">
                     <h3 class="font-bold text-xl mb-2" data-lang="maintenanceReminders">Recordatorios de Mantenimiento</h3>
                     <div class="flex space-x-2">
-                        <button type="button" id="reminder-3m" class="text-sm bg-gray-500 text-white py-1 px-3 rounded-md" data-lang="add3Months">Añadir a 3 meses</button>
+                        <button type="button" id="reminder-3m" class="text-sm btn-secondary py-1 px-3 rounded-md" data-lang="add3Months">Añadir a 3 meses</button>
                     </div>
                 </div>
             </div>
             <div class="mt-6 flex space-x-2 no-print">
-                <button id="download-pdf" class="bg-red-500 text-white py-2 px-4 rounded-md flex-grow" data-lang="downloadPdf">Descargar Reporte en PDF</button>
+                <button id="download-pdf" class="btn-accent text-white py-2 px-4 rounded-md flex-grow" data-lang="downloadPdf">Descargar Reporte en PDF</button>
             </div>
             <button id="reset-calc" class="mt-4 bg-yellow-500 text-white py-2 px-4 rounded-md w-full no-print" data-lang="resetCalc">Reiniciar Cálculo</button>
         </div>
@@ -306,6 +320,7 @@
                 computers: "# Computadoras / Laptops",
                 lights: "Luces (Watts totales)",
                 equipment: "Otros equipos (TV, etc.)",
+                usageHours: "Horas de Uso Diario",
                 advancedOptions: "4. Opciones Avanzadas",
                 usageType: "Tipo de Uso",
                 infiltration: "Infiltración de Aire Exterior",
@@ -320,6 +335,7 @@
                 efficiency: "Eficiencia",
                 consumption: "Consumo (kWh)",
                 monthlyCost: "Costo Mensual",
+                customSeer: "SEER Personalizado:",
                 maintenanceReminders: "Recordatorios de Mantenimiento",
                 add3Months: "Añadir a 3 meses",
                 downloadPdf: "Descargar Reporte en PDF",
@@ -356,6 +372,7 @@
                 computers: "# Computers / Laptops",
                 lights: "Lights (Total Watts)",
                 equipment: "Other Equipment (TV, etc.)",
+                usageHours: "Daily Usage Hours",
                 advancedOptions: "4. Advanced Options",
                 usageType: "Usage Type",
                 infiltration: "Air Infiltration",
@@ -370,6 +387,7 @@
                 efficiency: "Efficiency",
                 consumption: "Consumption (kWh)",
                 monthlyCost: "Monthly Cost",
+                customSeer: "Custom SEER:",
                 maintenanceReminders: "Maintenance Reminders",
                 add3Months: "Add 3-month reminder",
                 downloadPdf: "Download PDF Report",
@@ -383,7 +401,7 @@
         };
 
         // --- STATE & CONFIG ---
-        const state = { currentStep: 1, totalSteps: 4, btu: 0, lang: 'es' };
+        const state = { currentStep: 1, totalSteps: 4, btu: 0, lang: 'es', usageHours: 8 };
         const factors = { volume: 35, people: 600, computers: 500, lights: 3.41, otherHeat: 600, window: 1500 };
 
         // --- DOM ELEMENTS ---
@@ -400,6 +418,8 @@
         const themeToggle = document.getElementById('theme-toggle');
         const progressBar = document.getElementById('progress-bar');
         const langSelect = document.getElementById('lang-select');
+        const energyCostInput = document.getElementById('energy-cost');
+        const customSeerInput = document.getElementById('custom-seer');
         let heatLoadChart;
 
         // --- FUNCTIONS ---
@@ -458,7 +478,7 @@
                 labels: ['Estructura', 'Ventanas', 'Personas', 'Equipos'],
                 datasets: [{
                     data: Object.values(heatLoad),
-                    backgroundColor: ['#3b82f6', '#ef4444', '#f97316', '#8b5cf6'],
+                    backgroundColor: ['#15A2D1', '#ef4444', '#f97316', '#8b5cf6'],
                     borderColor: isDark ? '#1f2937' : '#ffffff',
                     borderWidth: 2
                 }]
@@ -504,12 +524,20 @@
         };
 
         const updateConsumptionTable = (btu) => {
-            const costPerKwh = parseFloat(document.getElementById('energy-cost').value) || 0;
+            const costPerKwh = parseFloat(energyCostInput.value) || 0;
+            const usageHours = parseFloat(document.getElementById('usage-hours').value) || 8;
             const tableBody = document.getElementById('consumption-table');
-            const efficiencies = [{ name: 'Estándar (SEER 16)', seer: 16 }, { name: 'Alta Eficiencia (SEER 21)', seer: 21 }];
+            const customSeer = parseFloat(customSeerInput.value) || 16;
+            
+            const efficiencies = [
+                { name: 'Estándar (SEER 16)', seer: 16 }, 
+                { name: 'Alta Eficiencia (SEER 21)', seer: 21 },
+                { name: `Personalizado (SEER ${customSeer})`, seer: customSeer }
+            ];
+            
             tableBody.innerHTML = '';
             efficiencies.forEach(eff => {
-                const kwhPerMonth = (btu / eff.seer) * 8 * 30 / 1000;
+                const kwhPerMonth = (btu / eff.seer) * usageHours * 30 / 1000;
                 const costPerMonth = kwhPerMonth * costPerKwh;
                 tableBody.innerHTML += `<tr><td>${eff.name}</td><td class="text-right">${kwhPerMonth.toFixed(0)}</td><td class="text-right">$${costPerMonth.toFixed(2)}</td></tr>`;
             });
@@ -557,27 +585,28 @@
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const values = {
-                length: parseFloat(document.getElementById('length').value),
-                width: parseFloat(document.getElementById('width').value),
-                height: parseFloat(document.getElementById('height').value),
+                length: parseFloat(document.getElementById('length').value) || 0,
+                width: parseFloat(document.getElementById('width').value) || 0,
+                height: parseFloat(document.getElementById('height').value) || 0,
                 climate: parseFloat(document.getElementById('climate-zone').value),
                 insWalls: parseFloat(document.getElementById('insulation-walls').value),
                 insRoof: parseFloat(document.getElementById('insulation-roof').value),
-                windows: parseInt(document.getElementById('windows').value),
+                windows: parseInt(document.getElementById('windows').value) || 0,
                 glass: parseFloat(document.getElementById('glass-type').value),
                 sun: parseFloat(document.getElementById('sun-exposure').value),
-                people: parseInt(document.getElementById('people').value),
-                computers: parseInt(document.getElementById('computers').value),
-                lights: parseInt(document.getElementById('lights').value),
-                otherHeat: parseInt(document.getElementById('other-heat').value),
+                people: parseInt(document.getElementById('people').value) || 0,
+                computers: parseInt(document.getElementById('computers').value) || 0,
+                lights: parseInt(document.getElementById('lights').value) || 0,
+                otherHeat: parseInt(document.getElementById('other-heat').value) || 0,
                 usageType: parseFloat(document.getElementById('usage-type').value),
                 infiltration: parseFloat(document.getElementById('infiltration').value)
             };
+            state.usageHours = parseFloat(document.getElementById('usage-hours').value) || 8;
             const heatLoad = {
                 structure: (values.length * values.width * values.height * factors.volume) * values.insWalls * values.insRoof * values.climate * values.usageType * values.infiltration,
                 windows: (values.windows * factors.window * values.glass) * values.sun,
                 people: values.people * factors.people,
-                equipment: (values.computers * factors.computers) + (values.lights * factors.lights) + (values.otherHeat * factors.otherHeat)
+                equipment: (values.computers * factors.computers) + (values.lights * factors.lights) + (values.otherHeat * values.otherHeat)
             };
             let totalBtu = Object.values(heatLoad).reduce((sum, val) => sum + val, 0);
             totalBtu *= 1.10; // Apply 10% safety factor
@@ -585,7 +614,8 @@
             displayResults(state.btu, heatLoad);
         });
 
-        document.getElementById('energy-cost').addEventListener('input', () => updateConsumptionTable(state.btu));
+        energyCostInput.addEventListener('input', () => updateConsumptionTable(state.btu));
+        customSeerInput.addEventListener('input', () => updateConsumptionTable(state.btu));
         reminder3mBtn.addEventListener('click', () => generateIcsFile(3));
         
         downloadPdfBtn.addEventListener('click', () => {
@@ -609,10 +639,8 @@
                 pdf.setFontSize(16);
                 pdf.text(title, 10, 15);
                 
-                // Add the report image, ensuring it fits on one page
                 pdf.addImage(imgData, 'PNG', 10, 25, pdfWidth - 20, Math.min(imgHeight, pdfHeight - 35));
 
-                // Add Maintenance Table on a new page
                 pdf.addPage();
                 pdf.setFontSize(16);
                 pdf.text(langData[state.lang].maintenancePlanTitle, 10, 15);
@@ -629,32 +657,24 @@
                     ]);
                 }
                 
-                // Manual Table Drawing
-                let y = 30;
-                const x1 = 15, x2 = 40, x3 = 80;
-                const rowHeight = 8, cellMargin = 2;
-                
-                pdf.setFontSize(10);
-                pdf.setFont('helvetica', 'bold');
-                pdf.text(tableColumn[0], x1, y);
-                pdf.text(tableColumn[1], x2, y);
-                pdf.text(tableColumn[2], x3, y);
-                y += rowHeight;
-                pdf.setLineWidth(0.2);
-                pdf.line(10, y - cellMargin, pdfWidth - 10, y - cellMargin);
-
-                pdf.setFont('helvetica', 'normal');
-                tableRows.forEach(row => {
-                    if (y > pdfHeight - 20) {
-                        pdf.addPage();
-                        y = 20;
-                    }
-                    const actionsText = pdf.splitTextToSize(row[2], 110);
-                    pdf.text(row[0], x1, y);
-                    pdf.text(row[1], x2, y);
-                    pdf.text(actionsText, x3, y);
-                    y += (actionsText.length * 5) + rowHeight / 2;
-                });
+                if (pdf.autoTable) {
+                    pdf.autoTable({
+                        head: [tableColumn],
+                        body: tableRows,
+                        startY: 25,
+                        theme: 'grid'
+                    });
+                } else { 
+                    let y = 30;
+                    pdf.setFontSize(10);
+                    tableRows.forEach(row => {
+                        if (y > pdfHeight - 20) {
+                            pdf.addPage(); y = 20;
+                        }
+                        pdf.text(`${row[0]} - ${row[1]}: ${row[2]}`, 10, y);
+                        y += 10;
+                    });
+                }
 
                 pdf.save(`reporte-calculo-ac-${city.replace(/\s/g, '_') || 'general'}.pdf`);
             });
