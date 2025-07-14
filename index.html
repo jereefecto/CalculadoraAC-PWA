@@ -83,6 +83,34 @@
             background-color: #f9f9f9 !important;
         }
         
+        /* MEJORAS ESPECÍFICAS PARA INPUTS */
+        .energy-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .energy-input {
+            width: 100px !important;
+            padding: 10px 12px !important;
+            font-size: 16px !important;
+            text-align: center;
+            border: 2px solid var(--accent-color) !important;
+            border-radius: 8px;
+            background-color: #ffffff !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .energy-input:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(87, 184, 105, 0.2);
+            outline: none;
+        }
+        .energy-label {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
         @media print {
             body * { visibility: hidden; }
             #results-column, #results-column * { visibility: visible; }
@@ -117,6 +145,15 @@
                 font-family: Arial, sans-serif !important;
                 font-size: 15px !important;
                 color: #333 !important;
+            }
+            /* Estilos específicos para inputs en PDF */
+            .energy-input {
+                border: 2px solid #ccc !important;
+                background-color: #f0f0f0 !important;
+                padding: 8px 10px !important;
+                font-size: 14px !important;
+                width: 80px !important;
+                box-shadow: none !important;
             }
         }
     </style>
@@ -167,12 +204,21 @@
                         <div id="rec-type" class="p-3 card rounded-md pdf-text"></div>
                         <div id="rec-electrical" class="p-3 card rounded-md pdf-text"></div>
                         <div class="p-3 card rounded-md pdf-section">
-                            <h4 class="font-semibold pdf-text" data-lang="consumptionComparison">Comparativa de Consumo Mensual</h4>
-                            <div class="flex items-center space-x-2 text-sm mt-2">
-                                <label for="energy-cost" class="pdf-text" data-lang="costPerKwh">Costo kWh ($):</label>
-                                <input type="number" id="energy-cost" value="0.20" step="0.01" class="w-20 p-1 input-field rounded-md">
+                            <h4 class="font-semibold pdf-text mb-4" data-lang="consumptionComparison">Comparativa de Consumo Mensual</h4>
+                            
+                            <!-- MEJORADO: Contenedores para inputs de energía y SEER -->
+                            <div class="flex flex-col gap-4 mb-4">
+                                <div class="energy-input-container">
+                                    <span class="energy-label pdf-text" data-lang="costPerKwh">Costo kWh ($):</span>
+                                    <input type="number" id="energy-cost" value="0.20" step="0.01" class="energy-input">
+                                </div>
+                                <div class="energy-input-container">
+                                    <span class="energy-label pdf-text" data-lang="customSeer">SEER Personalizado:</span>
+                                    <input type="number" id="custom-seer" value="16" step="1" class="energy-input">
+                                </div>
                             </div>
-                            <table class="w-full text-sm mt-2 pdf-table">
+                            
+                            <table class="w-full text-sm pdf-table">
                                 <thead>
                                 <tr class="border-b border-border-color">
                                     <th class="text-left pdf-text" data-lang="efficiency">Eficiencia</th>
@@ -182,10 +228,6 @@
                                 </thead>
                                 <tbody id="consumption-table"></tbody>
                             </table>
-                            <div class="flex items-center space-x-2 text-sm mt-4">
-                                <label for="custom-seer" class="pdf-text" data-lang="customSeer">SEER Personalizado:</label>
-                                <input type="number" id="custom-seer" value="16" step="1" class="w-20 p-1 input-field rounded-md">
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -246,6 +288,15 @@
                 el.style.fontFamily = 'monospace';
                 el.style.fontWeight = 'bold';
                 el.style.letterSpacing = '0.5px';
+            });
+            
+            // Asegurar que los inputs tengan suficiente espacio
+            contentClone.querySelectorAll('.energy-input').forEach(input => {
+                input.style.width = '80px';
+                input.style.padding = '8px 10px';
+                input.style.fontSize = '14px';
+                input.style.border = '2px solid #ccc';
+                input.style.backgroundColor = '#f0f0f0';
             });
             
             // Capturar el contenido clonado con html2canvas
