@@ -22,236 +22,43 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        :root {
-            --bg-color: #f0f4f8; /* Gris azulado muy claro */
-            --card-bg-color: #ffffff;
-            --text-color: #1A5F7A; /* Azul oscuro del logo */
-            --text-muted-color: #6b7280;
-            --border-color: #e5e7eb;
-            --primary-color: #57B869; /* Verde del logo */
-            --accent-color: #15A2D1; /* Azul claro del copo de nieve */
-        }
-        html.dark {
-            --bg-color: #1A5F7A; /* Azul oscuro del logo */
-            --card-bg-color: #247494; /* Azul oscuro más claro */
-            --text-color: #ffffff;
-            --text-muted-color: #a0d3e8; /* Azul claro para texto secundario */
-            --border-color: #247494;
-        }
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
-        .card { background-color: var(--card-bg-color); border: 1px solid var(--border-color); }
-        .form-step { display: none; } .form-step.active { display: block; }
-        .input-field { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); }
-        .icon-label { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
-        .icon-label i { font-size: 1.2rem; color: var(--primary-color); }
-        .theme-switch { display: inline-block; height: 24px; position: relative; width: 50px; }
-        .slider { background-color: #ccc; bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0; transition: .4s; }
-        .slider:before { background-color: #fff; bottom: 4px; content: ""; height: 16px; left: 4px; position: absolute; transition: .4s; width: 16px; }
-        input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(26px); }
-        .slider.round { border-radius: 34px; } .slider.round:before { border-radius: 50%; }
-        .btn-primary { background-color: var(--primary-color); color: white; }
-        .btn-secondary { background-color: var(--text-muted-color); color: white; }
-        .btn-accent { background-color: var(--accent-color); color: white; }
+        /* ... (estilos existentes) ... */
 
-        .chart-container {
-            position: relative;
-            max-height: 350px;
-            margin: auto;
+        /* SOLUCIÓN: Estilos específicos para PDF */
+        .pdf-export #consumption-table {
+            font-size: 14px;
+            table-layout: fixed;
+            width: 100%;
         }
-
-        /* SOLUCIÓN: Nuevos estilos para PDF */
-        .pdf-table td, .pdf-table th {
-            padding: 8px 12px !important;
-            font-size: 14px !important;
-        }
-        .pdf-table .number-cell {
-            font-family: monospace !important;
-            font-weight: bold !important;
-            letter-spacing: 0.5px !important;
-        }
-        .pdf-text {
-            font-family: Arial, sans-serif !important;
-            font-size: 15px !important;
-            color: #333 !important;
-        }
-        .pdf-section {
-            margin-bottom: 20px !important;
-            padding: 15px !important;
-            border: 1px solid #e0e0e0 !important;
-            border-radius: 8px !important;
-            background-color: #f9f9f9 !important;
-        }
-        
-        /* MEJORAS ESPECÍFICAS PARA INPUTS */
-        .energy-input-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .energy-input {
-            width: 100px !important;
-            padding: 10px 12px !important;
-            font-size: 16px !important;
-            text-align: center;
-            border: 2px solid var(--accent-color) !important;
-            border-radius: 8px;
-            background-color: #ffffff !important;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        .energy-input:focus {
-            border-color: var(--primary-color) !important;
-            box-shadow: 0 0 0 3px rgba(87, 184, 105, 0.2);
-            outline: none;
-        }
-        .energy-label {
-            font-weight: 600;
+        .pdf-export #consumption-table td, 
+        .pdf-export #consumption-table th {
+            padding: 4px 8px;
             white-space: nowrap;
         }
-        
-        @media print {
-            body * { visibility: hidden; }
-            #results-column, #results-column * { visibility: visible; }
-            #results-column { 
-                position: absolute; 
-                left: 0; 
-                top: 0; 
-                width: 100%; 
-                border: none; 
-                box-shadow: none; 
-                padding: 0; 
-                margin: 0;
-                font-size: 14px !important;
-            }
-            .no-print { display: none; }
-            .chart-container {
-                break-inside: avoid;
-                page-break-inside: avoid;
-                max-height: 250px; 
-            }
-            /* Asegurar que los números sean legibles */
-            .pdf-table td, .pdf-table th {
-                padding: 8px 12px !important;
-                font-size: 14px !important;
-            }
-            .pdf-table .number-cell {
-                font-family: monospace !important;
-                font-weight: bold !important;
-                letter-spacing: 0.5px !important;
-            }
-            .pdf-text {
-                font-family: Arial, sans-serif !important;
-                font-size: 15px !important;
-                color: #333 !important;
-            }
-            /* Estilos específicos para inputs en PDF */
-            .energy-input {
-                border: 2px solid #ccc !important;
-                background-color: #f0f0f0 !important;
-                padding: 8px 10px !important;
-                font-size: 14px !important;
-                width: 80px !important;
-                box-shadow: none !important;
-            }
+        .pdf-export #consumption-table td:nth-child(1),
+        .pdf-export #consumption-table th:nth-child(1) {
+            width: 40%;
         }
+        .pdf-export #consumption-table td:nth-child(2),
+        .pdf-export #consumption-table th:nth-child(2),
+        .pdf-export #consumption-table td:nth-child(3),
+        .pdf-export #consumption-table th:nth-child(3) {
+            width: 30%;
+            text-align: right;
+        }
+
+        /* ... (otros estilos existentes) ... */
     </style>
 </head>
 <body class="p-4">
-<div class="w-full max-w-6xl mx-auto">
-    <header class="flex justify-between items-center mb-6 no-print">
-        <div>
-            <h1 class="text-3xl font-bold" data-lang="title">Calculadora Profesional de AC</h1>
-            <p class="text-muted-color" data-lang="description">Una herramienta completa para el cálculo térmico.</p>
-        </div>
-        <div class="flex items-center space-x-4">
-            <div class="flex items-center space-x-2">
-                <label for="lang-select" class="text-sm" data-lang="languageLabel">Idioma:</label>
-                <select id="lang-select" class="p-1 rounded-md input-field text-sm">
-                    <option value="es">Español</option>
-                    <option value="en">English</option>
-                </select>
-            </div>
-            <div class="theme-switch-wrapper">
-                <label class="theme-switch" for="theme-toggle">
-                    <input type="checkbox" id="theme-toggle" aria-label="Activar modo oscuro" title="Activar modo oscuro"/>
-                    <div class="slider round"></div>
-                </label>
-            </div>
-        </div>
-    </header>
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div id="form-container" class="lg:col-span-2 card rounded-xl shadow-lg p-6 no-print">
-            <!-- ... (tu formulario existente) ... -->
-        </div>
-        <!-- Columna de Resultados -->
-        <div id="results-column" class="lg:col-span-1 card rounded-xl shadow-lg p-6 hidden">
-            <div id="report-content">
-                <h2 class="font-bold text-2xl mb-4 pdf-text" data-lang="resultsTitle">Resultados del Cálculo</h2>
-                <div class="text-center mb-6">
-                    <p class="text-lg text-muted-color pdf-text" data-lang="requiredCapacity">Capacidad Requerida</p>
-                    <p class="text-5xl font-bold pdf-text" id="btu-result" style="color: var(--primary-color);">12,000 BTU/h</p>
-                    <p class="text-muted-color pdf-text" id="kw-result">(3.5 kW)</p>
-                </div>
-                <div class="mb-6 chart-container">
-                    <h3 class="font-bold text-xl mb-2 pdf-text" data-lang="loadBreakdown">Desglose de Carga Térmica</h3>
-                    <canvas id="heatLoadChart"></canvas>
-                </div>
-                <div>
-                    <h3 class="font-bold text-xl mb-2 pdf-text" data-lang="recommendations">Recomendaciones</h3>
-                    <div class="space-y-3">
-                        <div id="rec-type" class="p-3 card rounded-md pdf-text"></div>
-                        <div id="rec-electrical" class="p-3 card rounded-md pdf-text"></div>
-                        <div class="p-3 card rounded-md pdf-section">
-                            <h4 class="font-semibold pdf-text mb-4" data-lang="consumptionComparison">Comparativa de Consumo Mensual</h4>
-                            
-                            <!-- MEJORADO: Contenedores para inputs de energía y SEER -->
-                            <div class="flex flex-col gap-4 mb-4">
-                                <div class="energy-input-container">
-                                    <span class="energy-label pdf-text" data-lang="costPerKwh">Costo kWh ($):</span>
-                                    <input type="number" id="energy-cost" value="0.20" step="0.01" class="energy-input">
-                                </div>
-                                <div class="energy-input-container">
-                                    <span class="energy-label pdf-text" data-lang="customSeer">SEER Personalizado:</span>
-                                    <input type="number" id="custom-seer" value="16" step="1" class="energy-input">
-                                </div>
-                            </div>
-                            
-                            <table class="w-full text-sm pdf-table">
-                                <thead>
-                                <tr class="border-b border-border-color">
-                                    <th class="text-left pdf-text" data-lang="efficiency">Eficiencia</th>
-                                    <th class="text-right pdf-text" data-lang="consumption">Consumo (kWh)</th>
-                                    <th class="text-right pdf-text" data-lang="monthlyCost">Costo Mensual</th>
-                                </tr>
-                                </thead>
-                                <tbody id="consumption-table"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-6">
-                    <h3 class="font-bold text-xl mb-2 pdf-text" data-lang="maintenanceReminders">Recordatorios de Mantenimiento</h3>
-                    <div class="flex space-x-2">
-                        <button type="button" id="reminder-3m" class="text-sm btn-secondary py-1 px-3 rounded-md" data-lang="add3Months">Añadir a 3 meses</button>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-6 flex space-x-2 no-print">
-                <button id="download-pdf" class="btn-accent text-white py-2 px-4 rounded-md flex-grow" data-lang="downloadPdf">Descargar Reporte en PDF</button>
-            </div>
-            <button id="reset-calc" class="mt-4 bg-yellow-500 text-white py-2 px-4 rounded-md w-full no-print" data-lang="resetCalc">Reiniciar Cálculo</button>
-        </div>
-    </div>
-</div>
+<!-- ... (código HTML existente) ... -->
 
 <!-- App Script -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // ... (tu código JavaScript existente) ...
-        
-        // Función para generar PDF optimizado
+        // ... (código JavaScript existente) ...
+
+        // Función optimizada para generar PDF
         const generateOptimizedPDF = () => {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
@@ -259,53 +66,25 @@
             const title = `Reporte de Cálculo - ${city}`;
             const reportContent = document.getElementById('report-content');
             
-            // Clonar el contenido para aplicar estilos específicos de PDF
-            const tempDiv = document.createElement('div');
-            tempDiv.style.position = 'absolute';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.width = '210mm';
-            tempDiv.style.padding = '20px';
-            tempDiv.style.backgroundColor = '#fff';
-            
-            const contentClone = reportContent.cloneNode(true);
-            contentClone.classList.add('pdf-export');
-            tempDiv.appendChild(contentClone);
-            document.body.appendChild(tempDiv);
-            
-            // Aplicar estilos específicos para PDF
-            contentClone.querySelectorAll('.pdf-text').forEach(el => {
-                el.style.fontFamily = 'Arial, sans-serif';
-                el.style.fontSize = '12pt';
-                el.style.color = '#000';
-            });
-            
-            contentClone.querySelectorAll('.pdf-table td, .pdf-table th').forEach(el => {
-                el.style.padding = '8px 12px';
-                el.style.fontSize = '11pt';
-            });
-            
-            contentClone.querySelectorAll('.number-cell').forEach(el => {
-                el.style.fontFamily = 'monospace';
-                el.style.fontWeight = 'bold';
-                el.style.letterSpacing = '0.5px';
-            });
-            
-            // Asegurar que los inputs tengan suficiente espacio
-            contentClone.querySelectorAll('.energy-input').forEach(input => {
-                input.style.width = '80px';
-                input.style.padding = '8px 10px';
-                input.style.fontSize = '14px';
-                input.style.border = '2px solid #ccc';
-                input.style.backgroundColor = '#f0f0f0';
-            });
-            
-            // Capturar el contenido clonado con html2canvas
-            html2canvas(contentClone, { 
-                scale: 2,
+            if (!reportContent) {
+                console.error('Elemento #report-content no encontrado');
+                return;
+            }
+
+            // Opciones optimizadas para html2canvas
+            const options = {
+                scale: 2,  // No exceder scale:3 por problemas de memoria
                 useCORS: true,
                 logging: false,
-                backgroundColor: '#FFFFFF'
-            }).then(canvas => {
+                backgroundColor: '#FFFFFF',
+                onclone: (clonedDoc) => {
+                    const clonedContent = clonedDoc.getElementById('report-content');
+                    if (clonedContent) clonedContent.classList.add('pdf-export');
+                }
+            };
+
+            // Capturar contenido con estilos específicos
+            html2canvas(reportContent, options).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -316,19 +95,15 @@
                 pdf.text(title, 10, 15);
                 
                 pdf.addImage(imgData, 'PNG', 10, 25, pdfWidth - 20, Math.min(imgHeight, pdfHeight - 35));
-
-                // Eliminar el elemento temporal
-                document.body.removeChild(tempDiv);
-
-                // Guardar el PDF
+                
                 pdf.save(`reporte-calculo-ac-${city.replace(/\s/g, '_') || 'general'}.pdf`);
             });
         };
 
         // Actualizar el evento de descarga para usar el método optimizado
-        downloadPdfBtn.addEventListener('click', generateOptimizedPDF);
+        document.getElementById('download-pdf').addEventListener('click', generateOptimizedPDF);
         
-        // ... (resto de tu código JavaScript) ...
+        // ... (resto del código JavaScript) ...
     });
 </script>
 </body>
