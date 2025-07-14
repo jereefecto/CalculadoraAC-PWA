@@ -1,4 +1,13 @@
-png'
+const CACHE_NAME = 'calculadora-ac-cache-v1';
+const urlsToCache = [
+    './',
+    './index.html',
+    './manifest.json',
+    'https://cdn.tailwindcss.com',
+    'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js',
+    'https://unpkg.com/@phosphor-icons/web',
+    './icons/icon-192x192.png',
+    './icons/icon-512x512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -12,12 +21,15 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-    event.respondWith(+
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => {
+                if (response) {
                     return response;
                 }
                 return fetch(event.request);
             })
-    );-
+    );
 });
 
 self.addEventListener('activate', event => {
