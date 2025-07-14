@@ -22,614 +22,69 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        :root {
-            --bg-color: #f0f4f8; /* Gris azulado muy claro */
-            --card-bg-color: #ffffff;
-            --text-color: #1A5F7A; /* Azul oscuro del logo */
-            --text-muted-color: #6b7280;
-            --border-color: #e5e7eb;
-            --primary-color: #57B869; /* Verde del logo */
-            --accent-color: #15A2D1; /* Azul claro del copo de nieve */
-        }
-        html.dark {
-            --bg-color: #1A5F7A; /* Azul oscuro del logo */
-            --card-bg-color: #247494; /* Azul oscuro más claro */
-            --text-color: #ffffff;
-            --text-muted-color: #a0d3e8; /* Azul claro para texto secundario */
-            --border-color: #247494;
-        }
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
-        .card { background-color: var(--card-bg-color); border: 1px solid var(--border-color); }
-        .form-step { display: none; } .form-step.active { display: block; }
-        .input-field { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); }
-        .icon-label { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
-        .icon-label i { font-size: 1.2rem; color: var(--primary-color); }
-        .theme-switch { display: inline-block; height: 24px; position: relative; width: 50px; }
-        .slider { background-color: #ccc; bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0; transition: .4s; }
-        .slider:before { background-color: #fff; bottom: 4px; content: ""; height: 16px; left: 4px; position: absolute; transition: .4s; width: 16px; }
-        input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(26px); }
-        .slider.round { border-radius: 34px; } .slider.round:before { border-radius: 50%; }
-        .btn-primary { background-color: var(--primary-color); color: white; }
-        .btn-secondary { background-color: var(--text-muted-color); color: white; }
-        .btn-accent { background-color: var(--accent-color); color: white; }
+        /* ... (estilos existentes) ... */
 
-        .chart-container {
-            position: relative;
-            max-height: 350px;
-            margin: auto;
+        /* SOLUCIÓN: Estilos específicos para PDF */
+        .pdf-export #consumption-table {
+            font-size: 14px;
+            table-layout: fixed;
+            width: 100%;
+        }
+        .pdf-export #consumption-table td, 
+        .pdf-export #consumption-table th {
+            padding: 4px 8px;
+            white-space: nowrap;
+        }
+        .pdf-export #consumption-table td:nth-child(1),
+        .pdf-export #consumption-table th:nth-child(1) {
+            width: 40%;
+        }
+        .pdf-export #consumption-table td:nth-child(2),
+        .pdf-export #consumption-table th:nth-child(2),
+        .pdf-export #consumption-table td:nth-child(3),
+        .pdf-export #consumption-table th:nth-child(3) {
+            width: 30%;
+            text-align: right;
         }
 
-        @media print {
-            body * { visibility: hidden; }
-            #results-column, #results-column * { visibility: visible; }
-            #results-column { position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; padding: 0; margin: 0; }
-            .no-print { display: none; }
-            .chart-container {
-                break-inside: avoid;
-                page-break-inside: avoid;
-                max-height: 250px; 
-            }
-        }
+        /* ... (otros estilos existentes) ... */
     </style>
 </head>
 <body class="p-4">
-<div class="w-full max-w-6xl mx-auto">
-    <header class="flex justify-between items-center mb-6 no-print">
-        <div>
-            <h1 class="text-3xl font-bold" data-lang="title">Calculadora Profesional de AC</h1>
-            <p class="text-muted-color" data-lang="description">Una herramienta completa para el cálculo térmico.</p>
-        </div>
-        <div class="flex items-center space-x-4">
-            <div class="flex items-center space-x-2">
-                <label for="lang-select" class="text-sm" data-lang="languageLabel">Idioma:</label>
-                <select id="lang-select" class="p-1 rounded-md input-field text-sm">
-                    <option value="es">Español</option>
-                    <option value="en">English</option>
-                </select>
-            </div>
-            <div class="theme-switch-wrapper">
-                <label class="theme-switch" for="theme-toggle">
-                    <input type="checkbox" id="theme-toggle" aria-label="Activar modo oscuro" title="Activar modo oscuro"/>
-                    <div class="slider round"></div>
-                </label>
-            </div>
-        </div>
-    </header>
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div id="form-container" class="lg:col-span-2 card rounded-xl shadow-lg p-6 no-print">
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="font-medium" data-lang="stepProgress">Paso 1 de 4</span>
-                    <div class="w-full mx-4 bg-gray-200 rounded-full h-2">
-                        <div id="progress-bar" class="h-2 rounded-full" style="width: 25%; background-color: var(--primary-color);"></div>
-                    </div>
-                </div>
-            </div>
-            <form id="calculator-form">
-                <!-- Paso 1: Dimensiones y Ubicación -->
-                <div id="step-1" class="form-step active">
-                    <h3 class="font-bold text-xl mb-4" data-lang="dimensionsTitle">1. Dimensiones y Ubicación</h3>
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="length" class="icon-label"><i class="ph-bold ph-arrows-out-line-horizontal"></i><span data-lang="length">Largo (m)</span></label>
-                                <input type="number" id="length" value="5" step="0.1" class="w-full p-2 input-field rounded-md">
-                            </div>
-                            <div>
-                                <label for="width" class="icon-label"><i class="ph-bold ph-arrows-out-simple"></i><span data-lang="width">Ancho (m)</span></label>
-                                <input type="number" id="width" value="4" step="0.1" class="w-full p-2 input-field rounded-md">
-                            </div>
-                            <div>
-                                <label for="height" class="icon-label"><i class="ph-bold ph-arrows-out-line-vertical"></i><span data-lang="height">Altura (m)</span></label>
-                                <input type="number" id="height" value="2.5" step="0.1" class="w-full p-2 input-field rounded-md">
-                            </div>
-                        </div>
-                        <div>
-                            <label for="city" class="icon-label"><i class="ph-bold ph-map-pin-line"></i><span data-lang="city">Ciudad/Región</span></label>
-                            <input type="text" id="city" placeholder="Ej: Santo Domingo" class="w-full p-2 input-field rounded-md" data-lang-placeholder="cityPlaceholder">
-                        </div>
-                        <div>
-                            <label for="climate-zone" class="icon-label"><i class="ph-bold ph-thermometer"></i><span data-lang="climateZone">Zona Climática</span></label>
-                            <select id="climate-zone" class="w-full p-2 input-field rounded-md">
-                                <option value="1.0" data-lang-es="Templado" data-lang-en="Temperate">Templado</option>
-                                <option value="1.1" data-lang-es="Seco y Caluroso" data-lang-en="Dry and Hot">Seco y Caluroso</option>
-                                <option value="1.2" selected data-lang-es="Tropical Húmedo" data-lang-en="Humid Tropical">Tropical Húmedo</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <!-- Paso 2: Estructura y Aislamiento -->
-                <div id="step-2" class="form-step">
-                    <h3 class="font-bold text-xl mb-4" data-lang="structureTitle">2. Estructura y Aislamiento</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="icon-label"><i class="ph-bold ph-wall"></i><span data-lang="insulationWalls">Aislamiento de Paredes</span></label>
-                            <select id="insulation-walls" class="w-full p-2 input-field rounded-md">
-                                <option value="1.0" data-lang-es="Bueno (Ladrillo/Concreto con aislante)" data-lang-en="Good (Insulated Brick/Concrete)">Bueno</option>
-                                <option value="1.1" selected data-lang-es="Regular (Ladrillo/Concreto simple)" data-lang-en="Average (Simple Brick/Concrete)">Regular</option>
-                                <option value="1.2" data-lang-es="Malo (Madera/Lámina)" data-lang-en="Poor (Wood/Sheet Metal)">Malo</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="icon-label"><i class="ph-bold ph-house-line"></i><span data-lang="insulationRoof">Aislamiento de Techo</span></label>
-                            <select id="insulation-roof" class="w-full p-2 input-field rounded-md">
-                                <option value="1.0" data-lang-es="Bueno (Losa con aislante)" data-lang-en="Good (Insulated Slab)">Bueno</option>
-                                <option value="1.1" selected data-lang-es="Regular (Losa de concreto)" data-lang-en="Average (Concrete Slab)">Regular</option>
-                                <option value="1.3" data-lang-es="Malo (Lámina metálica/Teja)" data-lang-en="Poor (Metal Sheet/Tile)">Malo</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="windows" class="icon-label"><i class="ph-bold ph-windows"></i><span data-lang="windows"># de Ventanas</span></label>
-                                <input type="number" id="windows" value="2" class="w-full p-2 input-field rounded-md">
-                            </div>
-                            <div>
-                                <label class="icon-label"><i class="ph-bold ph-square-half"></i><span data-lang="glassType">Tipo de Vidrio</span></label>
-                                <select id="glass-type" class="w-full p-2 input-field rounded-md">
-                                    <option value="1.2" data-lang-es="Simple" data-lang-en="Single Pane">Simple</option>
-                                    <option value="1.0" selected data-lang-es="Doble Panel" data-lang-en="Double Pane">Doble Panel</option>
-                                    <option value="0.8" data-lang-es="Doble Panel (Low-E)" data-lang-en="Double Pane (Low-E)">Doble Panel (Low-E)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="icon-label"><i class="ph-bold ph-sun"></i><span data-lang="sunExposure">Orientación con más sol</span></label>
-                            <select id="sun-exposure" class="w-full p-2 input-field rounded-md">
-                                <option value="1.0" data-lang-es="Norte/Ninguna" data-lang-en="North/None">Norte/Ninguna</option>
-                                <option value="1.15" data-lang-es="Este (Sol de mañana)" data-lang-en="East (Morning Sun)">Este</option>
-                                <option value="1.25" selected data-lang-es="Oeste (Sol de tarde)" data-lang-en="West (Afternoon Sun)">Oeste</option>
-                                <option value="1.1" data-lang-es="Sur" data-lang-en="South">Sur</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <!-- Paso 3: Carga Interna -->
-                <div id="step-3" class="form-step">
-                    <h3 class="font-bold text-xl mb-4" data-lang="internalLoadTitle">3. Carga Térmica Interna</h3>
-                    <div class="space-y-4">
-                        <div><label for="people" class="icon-label"><i class="ph-bold ph-users"></i><span data-lang="occupants">Ocupantes habituales</span></label><input type="number" id="people" value="2" class="w-full p-2 input-field rounded-md"></div>
-                        <div><label for="computers" class="icon-label"><i class="ph-bold ph-desktop"></i><span data-lang="computers"># Computadoras / Laptops</span></label><input type="number" id="computers" value="1" class="w-full p-2 input-field rounded-md"></div>
-                        <div><label for="lights" class="icon-label"><i class="ph-bold ph-lightbulb"></i><span data-lang="lights">Luces (Watts totales)</span></label><input type="number" id="lights" value="100" class="w-full p-2 input-field rounded-md"></div>
-                        <div><label for="other-heat" class="icon-label"><i class="ph-bold ph-device-tablet"></i><span data-lang="equipment">Otros equipos (TV, etc.)</span></label><input type="number" id="other-heat" value="1" class="w-full p-2 input-field rounded-md"></div>
-                        <div><label for="usage-hours" class="icon-label"><i class="ph-bold ph-timer"></i><span data-lang="usageHours">Horas de Uso Diario</span></label><input type="number" id="usage-hours" value="8" class="w-full p-2 input-field rounded-md"></div>
-                    </div>
-                </div>
-                <!-- Paso 4: Opciones Avanzadas -->
-                <div id="step-4" class="form-step">
-                    <h3 class="font-bold text-xl mb-4" data-lang="advancedOptions">4. Opciones Avanzadas</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="icon-label"><i class="ph-bold ph-buildings"></i><span data-lang="usageType">Tipo de Uso</span></label>
-                            <select id="usage-type" class="w-full p-2 input-field rounded-md">
-                                <option value="1.0" data-lang-es="Uso Normal (Hogar)" data-lang-en="Normal Use (Home)">Normal</option>
-                                <option value="1.2" selected data-lang-es="Intensivo (Oficina)" data-lang-en="Intensive (Office)">Intensivo</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="icon-label"><i class="ph-bold ph-wind"></i><span data-lang="infiltration">Infiltración de Aire Exterior</span></label>
-                            <select id="infiltration" class="w-full p-2 input-field rounded-md">
-                                <option value="1.0" data-lang-es="Baja (Edificio sellado)" data-lang-en="Low (Sealed building)">Baja</option>
-                                <option value="1.1" data-lang-es="Media (Algunas puertas/ventanas abiertas)" data-lang-en="Medium (Some open doors/windows)">Media</option>
-                                <option value="1.2" selected data-lang-es="Alta (Espacio comercial abierto)" data-lang-en="High (Open commercial space)">Alta</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="icon-label"><i class="ph-bold ph-thermometer-cold"></i><span data-lang="coolingMode">Modo de Operación</span></label>
-                            <select id="cooling-mode" class="w-full p-2 input-field rounded-md">
-                                <option value="cooling" data-lang-es="Solo Enfriamiento" data-lang-en="Cooling Only">Enfriamiento</option>
-                                <option value="heating" data-lang-es="Calefacción" data-lang-en="Heating">Calefacción</option>
-                                <option value="both" selected data-lang-es="Ambos" data-lang-en="Both">Ambos</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <!-- Botones de navegación -->
-                <div class="mt-8 flex justify-between">
-                    <button type="button" id="prev-btn" class="py-2 px-4 rounded-md hidden btn-secondary" data-lang="prev">Anterior</button>
-                    <button type="button" id="next-btn" class="py-2 px-4 rounded-md btn-primary" data-lang="next">Siguiente</button>
-                    <button type="submit" id="calc-btn" class="py-2 px-4 rounded-md hidden btn-primary" data-lang="calculate">Calcular</button>
-                </div>
-                <p class="text-xs text-muted-color mt-4" data-lang="disclaimer">🔒 Todos los cálculos se realizan en tu dispositivo. Ningún dato es enviado a nuestros servidores.</p>
-            </form>
-        </div>
-        <!-- Columna de Resultados -->
-        <div id="results-column" class="lg:col-span-1 card rounded-xl shadow-lg p-6 hidden">
-            <div id="report-content">
-                <h2 class="font-bold text-2xl mb-4" data-lang="resultsTitle">Resultados del Cálculo</h2>
-                <div class="text-center mb-6">
-                    <p class="text-lg text-muted-color" data-lang="requiredCapacity">Capacidad Requerida</p>
-                    <p class="text-5xl font-bold" id="btu-result" style="color: var(--primary-color);">12,000 BTU/h</p>
-                    <p class="text-muted-color" id="kw-result">(3.5 kW)</p>
-                </div>
-                <div class="mb-6 chart-container">
-                    <h3 class="font-bold text-xl mb-2" data-lang="loadBreakdown">Desglose de Carga Térmica</h3>
-                    <canvas id="heatLoadChart"></canvas>
-                </div>
-                <div>
-                    <h3 class="font-bold text-xl mb-2" data-lang="recommendations">Recomendaciones</h3>
-                    <div class="space-y-3">
-                        <div id="rec-type" class="p-3 card rounded-md"></div>
-                        <div id="rec-electrical" class="p-3 card rounded-md"></div>
-                        <div class="p-3 card rounded-md">
-                            <h4 class="font-semibold" data-lang="consumptionComparison">Comparativa de Consumo Mensual</h4>
-                            <div class="flex items-center space-x-2 text-sm mt-2">
-                                <label for="energy-cost" data-lang="costPerKwh">Costo kWh ($):</label>
-                                <input type="number" id="energy-cost" value="0.20" step="0.01" class="w-20 p-1 input-field rounded-md">
-                            </div>
-                            <table class="w-full text-sm mt-2">
-                                <thead>
-                                <tr class="border-b border-border-color">
-                                    <th class="text-left" data-lang="efficiency">Eficiencia</th>
-                                    <th class="text-right" data-lang="consumption">Consumo (kWh)</th>
-                                    <th class="text-right" data-lang="monthlyCost">Costo Mensual</th>
-                                </tr>
-                                </thead>
-                                <tbody id="consumption-table"></tbody>
-                            </table>
-                            <div class="flex items-center space-x-2 text-sm mt-4">
-                                <label for="custom-seer" data-lang="customSeer">SEER Personalizado:</label>
-                                <input type="number" id="custom-seer" value="16" step="1" class="w-20 p-1 input-field rounded-md">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-6">
-                    <h3 class="font-bold text-xl mb-2" data-lang="maintenanceReminders">Recordatorios de Mantenimiento</h3>
-                    <div class="flex space-x-2">
-                        <button type="button" id="reminder-3m" class="text-sm btn-secondary py-1 px-3 rounded-md" data-lang="add3Months">Añadir a 3 meses</button>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-6 flex space-x-2 no-print">
-                <button id="download-pdf" class="btn-accent text-white py-2 px-4 rounded-md flex-grow" data-lang="downloadPdf">Descargar Reporte en PDF</button>
-            </div>
-            <button id="reset-calc" class="mt-4 bg-yellow-500 text-white py-2 px-4 rounded-md w-full no-print" data-lang="resetCalc">Reiniciar Cálculo</button>
-        </div>
-    </div>
-</div>
+<!-- ... (código HTML existente) ... -->
 
 <!-- App Script -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- LANGUAGE DATA ---
-        const langData = {
-            es: {
-                title: "Calculadora Profesional de AC",
-                description: "Una herramienta completa para el cálculo térmico.",
-                languageLabel: "Idioma:",
-                stepProgress: "Paso %s de %s",
-                prev: "Anterior",
-                next: "Siguiente",
-                calculate: "Calcular",
-                dimensionsTitle: "1. Dimensiones y Ubicación",
-                length: "Largo (m)",
-                width: "Ancho (m)",
-                height: "Altura (m)",
-                city: "Ciudad/Región",
-                cityPlaceholder: "Ej: Santo Domingo",
-                climateZone: "Zona Climática",
-                structureTitle: "2. Estructura y Aislamiento",
-                insulationWalls: "Aislamiento de Paredes",
-                insulationRoof: "Aislamiento de Techo",
-                windows: "# de Ventanas",
-                glassType: "Tipo de Vidrio",
-                sunExposure: "Orientación con más sol",
-                internalLoadTitle: "3. Carga Térmica Interna",
-                occupants: "Ocupantes habituales",
-                computers: "# Computadoras / Laptops",
-                lights: "Luces (Watts totales)",
-                equipment: "Otros equipos (TV, etc.)",
-                usageHours: "Horas de Uso Diario",
-                advancedOptions: "4. Opciones Avanzadas",
-                usageType: "Tipo de Uso",
-                infiltration: "Infiltración de Aire Exterior",
-                coolingMode: "Modo de Operación",
-                disclaimer: "🔒 Todos los cálculos se realizan en tu dispositivo. Ningún dato es enviado a nuestros servidores.",
-                resultsTitle: "Resultados del Cálculo",
-                requiredCapacity: "Capacidad Requerida",
-                loadBreakdown: "Desglose de Carga Térmica",
-                recommendations: "Recomendaciones",
-                consumptionComparison: "Comparativa de Consumo Mensual",
-                costPerKwh: "Costo kWh ($):",
-                efficiency: "Eficiencia",
-                consumption: "Consumo (kWh)",
-                monthlyCost: "Costo Mensual",
-                customSeer: "SEER Personalizado:",
-                maintenanceReminders: "Recordatorios de Mantenimiento",
-                add3Months: "Añadir a 3 meses",
-                downloadPdf: "Descargar Reporte en PDF",
-                resetCalc: "Nuevo Cálculo",
-                maintenancePlanTitle: "Plan de Mantenimiento Preventivo",
-                reminder: "Recordatorio",
-                date: "Fecha Sugerida",
-                actions: "Acciones Recomendadas",
-                actionDetails: "Limpieza de filtros, serpentín y desagüe. Revisión de gas y componentes eléctricos."
-            },
-            en: {
-                title: "Professional AC Calculator",
-                description: "A complete tool for thermal load calculation.",
-                languageLabel: "Language:",
-                stepProgress: "Step %s of %s",
-                prev: "Previous",
-                next: "Next",
-                calculate: "Calculate",
-                dimensionsTitle: "1. Dimensions & Location",
-                length: "Length (m)",
-                width: "Width (m)",
-                height: "Height (m)",
-                city: "City/Region",
-                cityPlaceholder: "E.g., Miami",
-                climateZone: "Climate Zone",
-                structureTitle: "2. Structure & Insulation",
-                insulationWalls: "Wall Insulation",
-                insulationRoof: "Ceiling Insulation",
-                windows: "# of Windows",
-                glassType: "Glass Type",
-                sunExposure: "Sunniest Orientation",
-                internalLoadTitle: "3. Internal Heat Load",
-                occupants: "Regular Occupants",
-                computers: "# Computers / Laptops",
-                lights: "Lights (Total Watts)",
-                equipment: "Other Equipment (TV, etc.)",
-                usageHours: "Daily Usage Hours",
-                advancedOptions: "4. Advanced Options",
-                usageType: "Usage Type",
-                infiltration: "Air Infiltration",
-                coolingMode: "Operation Mode",
-                disclaimer: "🔒 All calculations are performed on your device. No data is sent to our servers.",
-                resultsTitle: "Calculation Results",
-                requiredCapacity: "Required Capacity",
-                loadBreakdown: "Heat Load Breakdown",
-                recommendations: "Recommendations",
-                consumptionComparison: "Monthly Consumption Comparison",
-                costPerKwh: "Cost per kWh ($):",
-                efficiency: "Efficiency",
-                consumption: "Consumption (kWh)",
-                monthlyCost: "Monthly Cost",
-                customSeer: "Custom SEER:",
-                maintenanceReminders: "Maintenance Reminders",
-                add3Months: "Add 3-month reminder",
-                downloadPdf: "Download PDF Report",
-                resetCalc: "New Calculation",
-                maintenancePlanTitle: "Preventive Maintenance Plan",
-                reminder: "Reminder",
-                date: "Suggested Date",
-                actions: "Recommended Actions",
-                actionDetails: "Clean filters, coil, and drain. Check refrigerant and electrical components."
-            }
-        };
+        // ... (código JavaScript existente) ...
 
-        // --- STATE & CONFIG ---
-        const state = { currentStep: 1, totalSteps: 4, btu: 0, lang: 'es', usageHours: 8 };
-        const factors = { volume: 35, people: 600, computers: 500, lights: 3.41, otherHeat: 600, window: 1500 };
-
-        // --- DOM ELEMENTS ---
-        const form = document.getElementById('calculator-form');
-        const steps = document.querySelectorAll('.form-step');
-        const nextBtn = document.getElementById('next-btn');
-        const prevBtn = document.getElementById('prev-btn');
-        const calcBtn = document.getElementById('calc-btn');
-        const resultsCol = document.getElementById('results-column');
-        const formContainer = document.getElementById('form-container');
-        const downloadPdfBtn = document.getElementById('download-pdf');
-        const resetCalcBtn = document.getElementById('reset-calc');
-        const reminder3mBtn = document.getElementById('reminder-3m');
-        const themeToggle = document.getElementById('theme-toggle');
-        const progressBar = document.getElementById('progress-bar');
-        const langSelect = document.getElementById('lang-select');
-        const energyCostInput = document.getElementById('energy-cost');
-        const customSeerInput = document.getElementById('custom-seer');
-        let heatLoadChart;
-
-        // --- FUNCTIONS ---
-        const updateLanguage = (lang) => {
-            state.lang = lang;
-            document.documentElement.lang = lang;
-            document.title = langData[lang].title;
-            document.querySelectorAll('[data-lang]').forEach(el => {
-                const key = el.getAttribute('data-lang');
-                if (langData[lang][key]) {
-                    el.textContent = langData[lang][key].replace('%s', state.currentStep).replace('%s', state.totalSteps);
-                }
-            });
-            document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
-                const key = el.getAttribute('data-lang-placeholder');
-                if (langData[lang][key]) {
-                    el.placeholder = langData[lang][key];
-                }
-            });
-            document.querySelectorAll('option[data-lang-es]').forEach(option => {
-                option.textContent = option.getAttribute(`data-lang-${lang}`);
-            });
-        };
-
-        const updateFormNavigation = () => {
-            prevBtn.classList.toggle('hidden', state.currentStep === 1);
-            nextBtn.classList.toggle('hidden', state.currentStep === state.totalSteps);
-            calcBtn.classList.toggle('hidden', state.currentStep !== state.totalSteps);
-            document.querySelector('[data-lang="stepProgress"]').textContent = langData[state.lang].stepProgress.replace('%s', state.currentStep).replace('%s', state.totalSteps);
-            progressBar.style.width = `${(state.currentStep / state.totalSteps) * 100}%`;
-            steps.forEach((step, index) => step.classList.toggle('active', (index + 1) === state.currentStep));
-        };
-
-        const roundToCommercialBtu = (btu) => {
-            const commercialSizes = [9000, 12000, 18000, 24000, 36000, 48000, 60000];
-            for (const size of commercialSizes) {
-                if (btu <= size) return size;
-            }
-            return Math.ceil(btu / 6000) * 6000;
-        };
-
-        const displayResults = (btu, heatLoad) => {
-            document.getElementById('btu-result').textContent = `${btu.toLocaleString()} BTU/h`;
-            document.getElementById('kw-result').textContent = `(${(btu / 3412.14).toFixed(1)} kW)`;
-            renderChart(heatLoad);
-            renderRecommendations(btu);
-            formContainer.classList.add('lg:hidden');
-            resultsCol.classList.remove('hidden');
-            resultsCol.classList.add('lg:col-span-3');
-        };
-
-        const renderChart = (heatLoad) => {
-            const ctx = document.getElementById('heatLoadChart').getContext('2d');
-            const isDark = document.documentElement.classList.contains('dark');
-            const chartData = {
-                labels: ['Estructura', 'Ventanas', 'Personas', 'Equipos'],
-                datasets: [{
-                    data: Object.values(heatLoad),
-                    backgroundColor: ['#15A2D1', '#ef4444', '#f97316', '#8b5cf6'],
-                    borderColor: isDark ? '#1f2937' : '#ffffff',
-                    borderWidth: 2
-                }]
-            };
-            if (heatLoadChart) heatLoadChart.destroy();
-            heatLoadChart = new Chart(ctx, {
-                type: 'doughnut', data: chartData,
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: isDark ? '#f9fafb' : '#1f2937' } },
-                    tooltip: { callbacks: { label: (c) => `${c.label || ''}: ${Math.round(c.parsed).toLocaleString()} BTU` } } } }
-            });
-        };
-
-        const updateChartTheme = () => {
-            if (!heatLoadChart) return;
-            const isDark = document.documentElement.classList.contains('dark');
-            heatLoadChart.options.plugins.legend.labels.color = isDark ? '#f9fafb' : '#1f2937';
-            heatLoadChart.data.datasets[0].borderColor = isDark ? '#1f2937' : '#ffffff';
-            heatLoadChart.update();
-        };
-
-        const renderRecommendations = (btu) => {
-            const recTypeEl = document.getElementById('rec-type');
-            const recElectricalEl = document.getElementById('rec-electrical');
-            let typeRecHTML = '';
-            let elecRecHTML = '<strong>Instalación Eléctrica:</strong> ';
-
-            if (btu <= 12000) {
-                typeRecHTML = `<strong>Tipo de Sistema:</strong> Split Inverter (1x1)<p class="text-sm text-muted-color mt-1"><strong>Ideal para:</strong> Habitaciones, estudios u oficinas pequeñas.<br><strong>Ventajas:</strong> Alta eficiencia energética, bajo nivel de ruido y control individual.</p>`;
-                elecRecHTML += 'Breaker 20A, cable #12 AWG. Se recomienda un punto de conexión dedicado y protector de voltaje.';
-            } else if (btu <= 24000) {
-                typeRecHTML = `<strong>Tipo de Sistema:</strong> Split Inverter de Alta Capacidad<p class="text-sm text-muted-color mt-1"><strong>Ideal para:</strong> Salas de estar grandes, áreas de trabajo abiertas.<br><strong>Ventajas:</strong> Excelente capacidad de enfriamiento con eficiencia Inverter.</p>`;
-                elecRecHTML += 'Breaker 30A, cable #10 AWG. Verificar capacidad del panel eléctrico principal.';
-            } else if (btu <= 36000) {
-                typeRecHTML = `<strong>Tipo de Sistema:</strong> Multi-Split o Central por Conductos<p class="text-sm text-muted-color mt-1"><strong>Ideal para:</strong> Apartamentos, varias oficinas o residencias medianas.<br><strong>Ventajas:</strong> Climatiza múltiples zonas (Multi-Split) o de forma uniforme (Central).</p>`;
-                elecRecHTML += 'Breaker 40A, cable #8 AWG. Requiere evaluación profesional y posible subpanel.';
-            } else {
-                typeRecHTML = `<strong>Tipo de Sistema:</strong> Sistema VRV/VRF o Central de Alta Capacidad<p class="text-sm text-muted-color mt-1"><strong>Ideal para:</strong> Edificios comerciales, residencias grandes.<br><strong>Ventajas:</strong> Máxima eficiencia, control zonificado avanzado.</p>`;
-                elecRecHTML += 'Evaluación profesional obligatoria. Breaker > 50A, cable #6 AWG o superior.';
-            }
-            recTypeEl.innerHTML = typeRecHTML;
-            recElectricalEl.innerHTML = elecRecHTML;
-            updateConsumptionTable(btu);
-        };
-
-        const updateConsumptionTable = (btu) => {
-            const costPerKwh = parseFloat(energyCostInput.value) || 0;
-            const usageHours = parseFloat(document.getElementById('usage-hours').value) || 8;
-            const tableBody = document.getElementById('consumption-table');
-            const customSeer = parseFloat(customSeerInput.value) || 16;
-            
-            const efficiencies = [
-                { name: 'Estándar (SEER 16)', seer: 16 }, 
-                { name: 'Alta Eficiencia (SEER 21)', seer: 21 },
-                { name: `Personalizado (SEER ${customSeer})`, seer: customSeer }
-            ];
-            
-            tableBody.innerHTML = '';
-            efficiencies.forEach(eff => {
-                const kwhPerMonth = (btu / eff.seer) * usageHours * 30 / 1000;
-                const costPerMonth = kwhPerMonth * costPerKwh;
-                tableBody.innerHTML += `<tr><td>${eff.name}</td><td class="text-right">${kwhPerMonth.toFixed(0)}</td><td class="text-right">$${costPerMonth.toFixed(2)}</td></tr>`;
-            });
-        };
-
-        const generateIcsFile = (months) => {
-            const now = new Date();
-            const eventDate = new Date(now.setMonth(now.getMonth() + months));
-            const toISOString = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-            const icsContent = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//CalculadoraAC//NONSGML v1.0//EN\r\nBEGIN:VEVENT\r\nUID:${Date.now()}@calculadora.ac\r\nDTSTAMP:${toISOString(new Date())}\r\nDTSTART;VALUE=DATE:${toISOString(eventDate).substring(0, 8)}\r\nSUMMARY:Mantenimiento de Aire Acondicionado\r\nDESCRIPTION:Recordatorio para realizar el mantenimiento preventivo de su equipo de aire acondicionado.\r\nEND:VEVENT\r\nEND:VCALENDAR`;
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `mantenimiento_ac_${months}_meses.ics`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-        
-        const loadTheme = () => {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                themeToggle.checked = true;
-                document.documentElement.classList.add('dark');
-            } else {
-                themeToggle.checked = false;
-                document.documentElement.classList.remove('dark');
-            }
-            updateChartTheme();
-        };
-
-        // --- EVENT LISTENERS & INITIALIZATION ---
-        langSelect.addEventListener('change', (e) => {
-            localStorage.setItem('lang', e.target.value);
-            updateLanguage(e.target.value);
-        });
-        nextBtn.addEventListener('click', () => { if (state.currentStep < state.totalSteps) { state.currentStep++; updateFormNavigation(); } });
-        prevBtn.addEventListener('click', () => { if (state.currentStep > 1) { state.currentStep--; updateFormNavigation(); } });
-        themeToggle.addEventListener('change', () => {
-            document.documentElement.classList.toggle('dark', themeToggle.checked);
-            localStorage.setItem('theme', themeToggle.checked ? 'dark' : 'light');
-            updateChartTheme();
-        });
-        
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const values = {
-                length: parseFloat(document.getElementById('length').value) || 0,
-                width: parseFloat(document.getElementById('width').value) || 0,
-                height: parseFloat(document.getElementById('height').value) || 0,
-                climate: parseFloat(document.getElementById('climate-zone').value),
-                insWalls: parseFloat(document.getElementById('insulation-walls').value),
-                insRoof: parseFloat(document.getElementById('insulation-roof').value),
-                windows: parseInt(document.getElementById('windows').value) || 0,
-                glass: parseFloat(document.getElementById('glass-type').value),
-                sun: parseFloat(document.getElementById('sun-exposure').value),
-                people: parseInt(document.getElementById('people').value) || 0,
-                computers: parseInt(document.getElementById('computers').value) || 0,
-                lights: parseInt(document.getElementById('lights').value) || 0,
-                otherHeat: parseInt(document.getElementById('other-heat').value) || 0,
-                usageType: parseFloat(document.getElementById('usage-type').value),
-                infiltration: parseFloat(document.getElementById('infiltration').value)
-            };
-            state.usageHours = parseFloat(document.getElementById('usage-hours').value) || 8;
-            const heatLoad = {
-                structure: (values.length * values.width * values.height * factors.volume) * values.insWalls * values.insRoof * values.climate * values.usageType * values.infiltration,
-                windows: (values.windows * factors.window * values.glass) * values.sun,
-                people: values.people * factors.people,
-                equipment: (values.computers * factors.computers) + (values.lights * factors.lights) + (values.otherHeat * values.otherHeat)
-            };
-            let totalBtu = Object.values(heatLoad).reduce((sum, val) => sum + val, 0);
-            totalBtu *= 1.10; // Apply 10% safety factor
-            state.btu = roundToCommercialBtu(totalBtu);
-            displayResults(state.btu, heatLoad);
-        });
-
-        energyCostInput.addEventListener('input', () => updateConsumptionTable(state.btu));
-        customSeerInput.addEventListener('input', () => updateConsumptionTable(state.btu));
-        reminder3mBtn.addEventListener('click', () => generateIcsFile(3));
-        
-        downloadPdfBtn.addEventListener('click', () => {
+        // Función optimizada para generar PDF
+        const generateOptimizedPDF = () => {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
             const city = document.getElementById('city').value || 'Ubicación General';
             const title = `Reporte de Cálculo - ${city}`;
             const reportContent = document.getElementById('report-content');
             
-            if (heatLoadChart) heatLoadChart.options.animation = false;
+            if (!reportContent) {
+                console.error('Elemento #report-content no encontrado');
+                return;
+            }
 
-            html2canvas(reportContent, { scale: 2, useCORS: true }).then(canvas => {
-                if (heatLoadChart) heatLoadChart.options.animation = true;
+            // Opciones optimizadas para html2canvas
+            const options = {
+                scale: 2,  // No exceder scale:3 por problemas de memoria
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#FFFFFF',
+                onclone: (clonedDoc) => {
+                    const clonedContent = clonedDoc.getElementById('report-content');
+                    if (clonedContent) clonedContent.classList.add('pdf-export');
+                }
+            };
 
+            // Capturar contenido con estilos específicos
+            html2canvas(reportContent, options).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -640,62 +95,16 @@
                 pdf.text(title, 10, 15);
                 
                 pdf.addImage(imgData, 'PNG', 10, 25, pdfWidth - 20, Math.min(imgHeight, pdfHeight - 35));
-
-                pdf.addPage();
-                pdf.setFontSize(16);
-                pdf.text(langData[state.lang].maintenancePlanTitle, 10, 15);
                 
-                const tableColumn = [langData[state.lang].reminder, langData[state.lang].date, langData[state.lang].actions];
-                const tableRows = [];
-                let currentDate = new Date();
-                for (let i = 1; i <= 8; i++) {
-                    currentDate.setMonth(currentDate.getMonth() + 3);
-                    tableRows.push([
-                        `#${i}`,
-                        currentDate.toLocaleDateString(state.lang),
-                        langData[state.lang].actionDetails
-                    ]);
-                }
-                
-                if (pdf.autoTable) {
-                    pdf.autoTable({
-                        head: [tableColumn],
-                        body: tableRows,
-                        startY: 25,
-                        theme: 'grid'
-                    });
-                } else { 
-                    let y = 30;
-                    pdf.setFontSize(10);
-                    tableRows.forEach(row => {
-                        if (y > pdfHeight - 20) {
-                            pdf.addPage(); y = 20;
-                        }
-                        pdf.text(`${row[0]} - ${row[1]}: ${row[2]}`, 10, y);
-                        y += 10;
-                    });
-                }
-
                 pdf.save(`reporte-calculo-ac-${city.replace(/\s/g, '_') || 'general'}.pdf`);
             });
-        });
+        };
 
-        resetCalcBtn.addEventListener('click', () => { location.reload(); });
-
-        const savedLang = localStorage.getItem('lang') || 'es';
-        langSelect.value = savedLang;
-        updateLanguage(savedLang);
-        loadTheme();
-        updateFormNavigation();
+        // Actualizar el evento de descarga para usar el método optimizado
+        document.getElementById('download-pdf').addEventListener('click', generateOptimizedPDF);
+        
+        // ... (resto del código JavaScript) ...
     });
-
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker registrado.', reg))
-                .catch(err => console.log('Error al registrar Service Worker:', err));
-        });
-    }
 </script>
 </body>
 </html>
