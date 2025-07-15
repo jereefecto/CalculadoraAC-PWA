@@ -98,6 +98,13 @@
             <p class="text-sm text-muted-color" data-lang="description">Una herramienta completa para el cálculo térmico.</p>
         </div>
         <div class="flex items-center space-x-4">
+             <div class="flex items-center space-x-2">
+                <label for="lang-select" class="text-sm" data-lang="languageLabel">Idioma:</label>
+                <select id="lang-select" class="p-1 rounded-md input-field text-sm">
+                    <option value="es">Español</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
             <div class="theme-switch-wrapper">
                 <label class="theme-switch" for="theme-toggle">
                     <input type="checkbox" id="theme-toggle" aria-label="Activar modo oscuro" title="Activar modo oscuro"/>
@@ -304,7 +311,7 @@
 
 <!-- App Script -->
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    const initApp = () => {
         // --- LANGUAGE DATA ---
         const langData = {
             es: {
@@ -715,7 +722,13 @@
         updateLanguage(savedLang);
         loadTheme();
         updateFormNavigation();
-    });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+        initApp();
+    }
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
