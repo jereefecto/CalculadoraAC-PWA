@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calculadora-ac-cache-v1';
+cconst CACHE_NAME = 'calculadora-ac-cache-v1';
 const urlsToCache = [
     './',
     './index.html',
@@ -46,3 +46,4 @@ self.addEventListener('activate', event => {
         })
     );
 });
+
