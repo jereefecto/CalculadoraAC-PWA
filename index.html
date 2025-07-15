@@ -225,11 +225,13 @@
                             </select>
                         </div>
                         <div>
-                            <label class="icon-label"><i class="ph-bold ph-thermometer-cold"></i><span data-lang="coolingMode">Modo de Operación</span></label>
-                            <select id="cooling-mode" class="w-full p-2 input-field rounded-md">
-                                <option value="cooling" data-lang-es="Solo Enfriamiento" data-lang-en="Cooling Only">Enfriamiento</option>
-                                <option value="heating" data-lang-es="Calefacción" data-lang-en="Heating">Calefacción</option>
-                                <option value="both" selected data-lang-es="Ambos" data-lang-en="Both">Ambos</option>
+                            <label class="icon-label"><i class="ph-bold ph-snowflake"></i><span data-lang="refrigerantType">Tipo de Refrigerante</span></label>
+                            <select id="refrigerant-type" class="w-full p-2 input-field rounded-md">
+                                <option value="r410a" selected>R-410A</option>
+                                <option value="r32">R-32</option>
+                                <option value="r22">R-22</option>
+                                <option value="r134a">R-134a</option>
+                                <option value="r404a">R-404a</option>
                             </select>
                         </div>
                     </div>
@@ -261,6 +263,7 @@
                     <div class="space-y-3">
                         <div id="rec-type" class="p-3 card rounded-md"></div>
                         <div id="rec-electrical" class="p-3 card rounded-md"></div>
+                        <div id="rec-refrigerant" class="p-3 card rounded-md"></div>
                         <div class="p-3 card rounded-md">
                             <h4 class="font-semibold" data-lang="consumptionComparison">Comparativa de Consumo Mensual</h4>
                             <div class="flex items-center space-x-2 text-sm mt-2">
@@ -334,7 +337,7 @@
                 advancedOptions: "4. Opciones Avanzadas",
                 usageType: "Tipo de Uso",
                 infiltration: "Infiltración de Aire Exterior",
-                coolingMode: "Modo de Operación",
+                refrigerantType: "Tipo de Refrigerante",
                 disclaimer: "🔒 Todos los cálculos se realizan en tu dispositivo. Ningún dato es enviado a nuestros servidores.",
                 resultsTitle: "Resultados del Cálculo",
                 requiredCapacity: "Capacidad Requerida",
@@ -386,7 +389,7 @@
                 advancedOptions: "4. Advanced Options",
                 usageType: "Usage Type",
                 infiltration: "Air Infiltration",
-                coolingMode: "Operation Mode",
+                refrigerantType: "Refrigerant Type",
                 disclaimer: "🔒 All calculations are performed on your device. No data is sent to our servers.",
                 resultsTitle: "Calculation Results",
                 requiredCapacity: "Required Capacity",
@@ -471,11 +474,11 @@
             return Math.ceil(btu / 6000) * 6000;
         };
 
-        const displayResults = (btu, heatLoad) => {
+        const displayResults = (btu, heatLoad, refrigerant) => {
             document.getElementById('btu-result').textContent = `${btu.toLocaleString()} BTU/h`;
             document.getElementById('kw-result').textContent = `(${(btu / 3412.14).toFixed(1)} kW)`;
             renderChart(heatLoad);
-            renderRecommendations(btu);
+            renderRecommendations(btu, refrigerant);
             formContainer.classList.add('lg:hidden');
             resultsCol.classList.remove('hidden');
             resultsCol.classList.add('lg:col-span-3');
@@ -509,11 +512,15 @@
             heatLoadChart.update();
         };
 
-        const renderRecommendations = (btu) => {
+        const renderRecommendations = (btu, refrigerant) => {
             const recTypeEl = document.getElementById('rec-type');
             const recElectricalEl = document.getElementById('rec-electrical');
+            const recRefrigerantEl = document.getElementById('rec-refrigerant');
             let typeRecHTML = '';
             let elecRecHTML = '<strong>Instalación Eléctrica:</strong> ';
+            let refrigerantHTML = `<strong>Refrigerante Seleccionado: ${refrigerant.name}</strong>`;
+
+            refrigerantHTML += `<p class="text-sm text-muted-color mt-1"><strong>GWP:</strong> ${refrigerant.gwp} | <strong>ODP:</strong> ${refrigerant.odp}<br>${refrigerant.info}</p>`;
 
             if (btu <= 12000) {
                 typeRecHTML = `<strong>Tipo de Sistema:</strong> Split Inverter (1x1)<p class="text-sm text-muted-color mt-1"><strong>Ideal para:</strong> Habitaciones, estudios u oficinas pequeñas.<br><strong>Ventajas:</strong> Alta eficiencia energética, bajo nivel de ruido y control individual.</p>`;
@@ -530,6 +537,7 @@
             }
             recTypeEl.innerHTML = typeRecHTML;
             recElectricalEl.innerHTML = elecRecHTML;
+            recRefrigerantEl.innerHTML = refrigerantHTML;
             updateConsumptionTable(btu);
         };
 
@@ -621,7 +629,17 @@
             let totalBtu = Object.values(heatLoad).reduce((sum, val) => sum + val, 0);
             totalBtu *= 1.10; // Apply 10% safety factor
             state.btu = roundToCommercialBtu(totalBtu);
-            displayResults(state.btu, heatLoad);
+            
+            const refrigerantType = document.getElementById('refrigerant-type').value;
+            const refrigerantData = {
+                r410a: { name: 'R-410A', gwp: 2088, odp: 0, info: 'Estándar actual, eficiente pero con alto GWP.' },
+                r32: { name: 'R-32', gwp: 675, odp: 0, info: 'Opción moderna y más ecológica, bajo GWP.' },
+                r22: { name: 'R-22', gwp: 1810, odp: 0.05, info: 'Obsoleto y dañino para la capa de ozono. Prohibido en equipos nuevos.' },
+                r134a: { name: 'R-134a', gwp: 1430, odp: 0, info: 'Común en automoción, menos usado en residencial.' },
+                r404a: { name: 'R-404a', gwp: 3922, odp: 0, info: 'Uso comercial/refrigeración, GWP muy elevado.' }
+            };
+
+            displayResults(state.btu, heatLoad, refrigerantData[refrigerantType]);
         });
 
         energyCostInput.addEventListener('input', () => updateConsumptionTable(state.btu));
@@ -635,33 +653,10 @@
             const title = `Reporte de Cálculo - ${city}`;
             const reportContent = document.getElementById('report-content');
             
-            // Ocultar inputs para el PDF y mostrar sus valores como texto
-            const energyCostInputEl = document.getElementById('energy-cost');
-            const customSeerInputEl = document.getElementById('custom-seer');
-            const energyCostValue = energyCostInputEl.value;
-            const customSeerValue = customSeerInputEl.value;
-            
-            energyCostInputEl.style.display = 'none';
-            customSeerInputEl.style.display = 'none';
-            
-            const energyCostText = document.createElement('span');
-            energyCostText.textContent = `$${energyCostValue}`;
-            energyCostInputEl.parentNode.appendChild(energyCostText);
-
-            const customSeerText = document.createElement('span');
-            customSeerText.textContent = customSeerValue;
-            customSeerInputEl.parentNode.appendChild(customSeerText);
-
             if (heatLoadChart) heatLoadChart.options.animation = false;
 
             html2canvas(reportContent, { scale: 2, useCORS: true }).then(canvas => {
                 if (heatLoadChart) heatLoadChart.options.animation = true;
-
-                // Restaurar la visibilidad de los inputs
-                energyCostInputEl.style.display = '';
-                customSeerInputEl.style.display = '';
-                energyCostText.remove();
-                customSeerText.remove();
 
                 const imgData = canvas.toDataURL('image/png');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
