@@ -1,3 +1,10 @@
+### **Paso 3: Archivo Service Worker (`sw.js`)**
+
+Este es el script que permite que tu aplicación funcione sin conexión a internet, guardando los archivos necesarios en el dispositivo del usuario.
+
+* **Acción:** Crea un archivo llamado `sw.js` y pega este código.
+
+```javascript
 const CACHE_NAME = 'calculadora-ac-cache-v1';
 const urlsToCache = [
     './',
@@ -46,3 +53,15 @@ self.addEventListener('activate', event => {
         })
     );
 });
+```
+
+### **Paso 4: Íconos de la Aplicación (Carpeta `icons`)**
+
+Estos íconos se usarán cuando instales la aplicación en tu escritorio o teléfono.
+
+1.  **Crea la Carpeta:** En la raíz de tu proyecto, crea una carpeta llamada `icons`.
+2.  **Añade las Imágenes:** Dentro de la carpeta `icons`, coloca tus dos archivos de imagen:
+    * `icon-192x192.png`
+    * `icon-512x512.png`
+
+Con todos estos archivos en su lugar, tu proyecto está completo y listo para ser subido a GitH
